@@ -7,6 +7,7 @@ package breekoot;
 
 import java.awt.Color;
 import java.awt.Graphics;
+import java.awt.Graphics2D;
 import java.time.Clock;
 import javax.swing.JPanel;
 
@@ -17,7 +18,9 @@ import javax.swing.JPanel;
 public class Board extends JPanel implements Runnable {
 
     private Thread animator;
-    int x = 0;
+    double x;
+    double speed;
+    boolean running;
 
     public Board() {
 
@@ -28,14 +31,15 @@ public class Board extends JPanel implements Runnable {
 
         setBackground(Color.BLACK);
         setDoubleBuffered(true);
+        
+        running = true;
     }
 
     @Override
     protected void paintComponent(Graphics g) {
         super.paintComponent(g);
 
-        g.setColor(Color.blue);
-        g.fillRect(0, 0, 20, 20);
+        draw(g);
     }
 
     @Override
@@ -53,7 +57,8 @@ public class Board extends JPanel implements Runnable {
 
         then = System.currentTimeMillis();
 
-        while (true) {
+        //The game loop
+        while (running) {
             //Get how long it's been since the last loop
             now = System.currentTimeMillis();
             delta = now - then;
@@ -82,6 +87,24 @@ public class Board extends JPanel implements Runnable {
     }
 
     private void updateGame(long delta) {
-        
+        double mod;
+        mod = delta * 0.001;
+        //speed is measured in percent per second right now
+        speed = 0.3; //10%
+        x += speed * mod;
+        if (x > 1) {
+            x = -0.1;
+        }
+        System.out.println();
+    }
+
+    private void draw(Graphics g) {
+        Graphics2D g2d = (Graphics2D) g;
+
+        int height = getHeight();
+        int width = getWidth();
+        g2d.setColor(Color.blue);
+        g2d.fillRect((int) (x * width), height - (int) (0.1 * height),
+                (int) (0.1 * width), (int) (0.1 * height));
     }
 }
