@@ -22,7 +22,7 @@ public class Application extends JFrame {
         //Create the custom JPanel for the game
         add(new Board());
         //Window size
-        setSize(250, 200);
+        setSize(800, 600);
         
         
         setTitle("Breek Oot");
