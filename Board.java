@@ -5,6 +5,7 @@
  */
 package breekoot;
 
+import com.sun.javafx.geom.Vec2f;
 import java.awt.Color;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
@@ -20,9 +21,8 @@ import javax.swing.JPanel;
 public class Board extends JPanel implements Runnable, KeyListener {
 
     private Thread animator;
-    double x;
-    double speed;
-    LinkedList<Integer> keys;
+    static public LinkedList<Integer> keys;
+    private LinkedList<GameObject> gameObjects;
 
     public enum GameState {
 
@@ -44,7 +44,49 @@ public class Board extends JPanel implements Runnable, KeyListener {
 
         gameState = GameState.MAIN_MENU;
         keys = new LinkedList<>();
+        gameObjects = new LinkedList<>();
+        
+        //Create ball
+        //5% wide, 5% high
+        float width = 0.05f;
+        float height = 0.05f;
+        //a bit left to the middle of the screen
+        float x = 0.25f-width/2;
+        float y = 0.5f-height/2;
+        //25% down per second, 50% right per second, white
+        Vec2f bSpeed = new Vec2f(0.25f, 0.5f);
+        Color color = Color.WHITE;
+        
+        gameObjects.add(new Ball(x, y, width, height, true, color, bSpeed));
+        //Add player
+        //15% wide, 5% high
+        width = 0.15f;
+        height = 0.05f;
+        //middle of screen, 5% above the bottom
+        x = 0.5f-width/2;
+        y = 1-(height+0.05f);
+        //50% per second, yellow
+        float pSpeed = 0.5f;
+        color = Color.YELLOW;
+        gameObjects.add(new Player(x, y, width, height, true, color, pSpeed));
 
+        int rows = 5;
+        int columns = 20;
+        for(int i = 0; i < rows; i++)
+        {
+            for(int j = 0; j < columns; j++)
+            {
+                width = 1/(float)columns;
+                height = 0.3f/(float)rows;
+                
+                x = width*j;
+                y = height*i;
+                
+                color = Color.MAGENTA;
+                gameObjects.add(new Block(x, y, width, height, true, color));
+            }
+        }
+        
         addKeyListener(this);
         setFocusable(true);
         requestFocusInWindow();
@@ -74,14 +116,12 @@ public class Board extends JPanel implements Runnable, KeyListener {
     public void keyPressed(KeyEvent e) {
         if (!keys.contains(e.getKeyCode())) {
             keys.add(e.getKeyCode());
-            System.out.println(e.getKeyCode() + " added");
         }
     }
 
     @Override
     public void keyReleased(KeyEvent e) {
         keys.removeFirstOccurrence(e.getKeyCode());
-        System.out.println(e.getKeyCode() + " removed");
     }
 
     @Override
@@ -122,25 +162,19 @@ public class Board extends JPanel implements Runnable, KeyListener {
 
     private void updateGame(long delta) {
         if (gameState == GameState.RUNNING) {
-            //change to seconds
-            double mod = delta * 0.001;
-            //Measured in percent per second
-            speed = 0.5;
-            //Move right
-            if (keys.contains(KeyEvent.VK_RIGHT)) {
-                x += speed * mod;
-                //Border constraint
-                if (x > 0.85) {
-                    x = 0.85;
+            //Update all GameObjects
+            for(GameObject go : gameObjects)
+            {
+                if(go.getClass().getSimpleName().equals("Ball"))
+                {
+                    Ball ball = (Ball)go;
+                    for(GameObject go2 : gameObjects)
+                    {
+                        if(!go2.getClass().getSimpleName().equals("Ball"))
+                            ball.collissionCheck(go2);
+                    }
                 }
-            }
-            //Move left
-            if (keys.contains(KeyEvent.VK_LEFT)) {
-                x -= speed * mod;
-                //Border constraint
-                if (x < 0) {
-                    x = 0;
-                }
+                go.update(delta);
             }
             //Pause with ESC or P
             if (keys.contains(KeyEvent.VK_ESCAPE)
@@ -165,14 +199,14 @@ public class Board extends JPanel implements Runnable, KeyListener {
     private void draw(Graphics g) {
         Graphics2D g2d = (Graphics2D) g;
 
-        int height = getHeight();
         int width = getWidth();
+        int height = getHeight();
 
         if (gameState == GameState.RUNNING) {
-            g2d.setColor(Color.BLUE);
-            //Temporarily messy, will get a class later
-            g2d.fillRect((int) (x * width), height - (int) (0.05 * height + 10),
-                    (int) (0.15 * width), (int) (0.05 * height));
+            for(GameObject go : gameObjects)
+            {
+                go.draw(g2d, width, height);
+            }
         } else if (gameState == GameState.PAUSED) {
             g2d.setColor(Color.GRAY);
             double oWidth = 0.8;
