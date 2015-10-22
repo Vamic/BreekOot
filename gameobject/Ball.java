@@ -3,7 +3,7 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package breekoot;
+package breekoot.gameobject;
 
 import com.sun.javafx.geom.Vec2f;
 import java.awt.Color;
@@ -16,10 +16,11 @@ import java.awt.geom.Rectangle2D;
 public class Ball extends GameObject {
 
     private Vec2f speed;
-
+    private float maxSpeed;
     public Ball(float x, float y, float width, float height, boolean physical, Color color, Vec2f speed) {
         super(x, y, width, height, physical, color);
         this.speed = speed;
+        maxSpeed = 0.75f;
     }
 
     @Override
@@ -37,8 +38,9 @@ public class Ball extends GameObject {
             speed.y = Math.abs(speed.y);
         }
         if (y > 1) {
-            y = 0.5f;
-            x = 0.5f;
+            y = 0.4f;
+            x = 0.4f;
+            Player.loseLife();
         }
     }
 
@@ -54,21 +56,30 @@ public class Ball extends GameObject {
             if (intersectRect.getHeight() > intersectRect.getWidth()) {
                 //Check if left or right side
                 if (intersectRect.getX() < thatRect.getCenterX()) {
+                    x = target.getX()-width;
                     speed.x = -Math.abs(speed.x);
                 } else if (intersectRect.getX() + intersectRect.getWidth() > thatRect.getCenterX()) {
+                    x = target.getX() + target.getWidth();
                     speed.x = Math.abs(speed.x);
                 }
             } else {
                 //Check if top or bottom
                 if (intersectRect.getCenterY() < thatRect.getCenterY()) {
+                    y = target.getY()-height;
                     speed.y = -Math.abs(speed.y);
                 } else if (intersectRect.getCenterY() > thatRect.getCenterY()) {
+                    y = target.getY() + target.getHeight();
                     speed.y = Math.abs(speed.y);
                 }
                 //Change speed depending on the players current speed
                 if (target.getClass().getSimpleName().equals("Player")) {
                     Player player = (Player) target;
-                    speed.x += player.getVelocity() * 5;
+                    
+                    speed.x += player.getCurrentSpeed() * 0.25;
+                    if(Math.abs(speed.x) > maxSpeed)
+                    {
+                        speed.x = Math.signum(speed.x)*maxSpeed;
+                    }
                 }
             }
             if (target.getClass().getSimpleName().equals("Block")) {

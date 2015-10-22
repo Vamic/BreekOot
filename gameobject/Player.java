@@ -3,8 +3,9 @@
  * To change this template file, choose Tools | Templates
  * and open the template in the editor.
  */
-package breekoot;
+package breekoot.gameobject;
 
+import breekoot.Board;
 import java.awt.Color;
 import java.awt.event.KeyEvent;
 
@@ -15,11 +16,30 @@ import java.awt.event.KeyEvent;
 public class Player extends GameObject {
 
     private float speed;
-    private float velocity;
-    public Player(float x, float y, float width, float height, boolean physical, Color color, float speed) {
+    private float direction;
+    private static int score;
+    private static int lives;
+
+    public int getLives() {
+        return lives;
+    }
+
+    public static void loseLife() {
+        Player.lives--;
+    }
+
+    public static int getScore() {
+        return score;
+    }
+
+    public static void addScore(int score) {
+        Player.score += score;
+    }
+    public Player(float x, float y, float width, float height, boolean physical, Color color, float speed, int lives) {
         super(x, y, width, height, physical, color);
         this.speed = speed;
-        velocity = 0;
+        direction = 0;
+        Player.lives = lives;
     }
 
     @Override
@@ -44,11 +64,11 @@ public class Player extends GameObject {
                 x = 0;
             }
         }
-        velocity = x-oldX;
+        direction = Math.signum(x-oldX);
     }
 
-    public float getVelocity()
+    public float getCurrentSpeed()
     {
-        return velocity;
+        return direction*speed;
     }
 }
