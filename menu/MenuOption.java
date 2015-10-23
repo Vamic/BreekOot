@@ -51,7 +51,9 @@ public class MenuOption {
 
             g2d.fillRect(rX, rY, rWidth, rHeight);
             g2d.setColor(Color.BLACK);
-            g2d.drawString(text, rX, rY + rHeight / 2);
+            int sX = rX + rWidth / 2 - g2d.getFontMetrics().stringWidth(text) / 2;
+            int sY = rY + rHeight / 2 + g2d.getFont().getSize() / 2;
+            g2d.drawString(text, sX, sY);
         }
     }
 

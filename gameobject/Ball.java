@@ -15,8 +15,8 @@ import java.awt.geom.Rectangle2D;
  */
 public class Ball extends GameObject {
 
-    private Vec2f speed;
-    private float maxSpeed;
+    private final Vec2f speed;
+    private final float maxSpeed;
     public Ball(float x, float y, float width, float height, boolean physical, Color color, Vec2f speed) {
         super(x, y, width, height, physical, color);
         this.speed = speed;
