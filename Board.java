@@ -60,9 +60,8 @@ public class Board extends JPanel implements Runnable, KeyListener {
         save();
         System.exit(0);
     }
-    
+
     public static void revive() {
-        save();
         reset = true;
     }
 
@@ -83,8 +82,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
                 }
                 writer.println(line);
             }
-            if(count < 10)
-            {
+            if (count < 10) {
                 writer.println(Player.getName() + ":" + Player.getScore());
             }
         } catch (Exception ex) {
@@ -109,7 +107,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
         }
 
         reset = false;
-        
+
         gameObjects = new LinkedList<>();
         //Decide how many blocks, also makes ball size appropriate
         int rows = 10;
@@ -247,8 +245,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
     }
 
     private void updateGame(long delta) {
-        if(reset)
-        {
+        if (reset) {
             resetGame();
             return;
         }
@@ -267,6 +264,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
                     Player player = (Player) go;
                     if (player.getLives() <= 0) {
                         gameState = GameState.GAME_OVER;
+                        save();
                     }
                 }
                 go.update(delta);
@@ -308,7 +306,25 @@ public class Board extends JPanel implements Runnable, KeyListener {
                 || gameState == GameState.PAUSED) {
             g2d.setFont(new Font("Comic Sans MS", 20, 20));
             menu.draw(g2d, width, height);
+        } else if (gameState == GameState.GAME_OVER) {
+            g2d.setColor(Color.WHITE);
+            for (int i = 0; i < 10; i++) {
+                try {
+                    g2d.setFont(new Font("Comic Sans MS", 20, 20));
+                    String text = highscore.split("\\n")[i];
+                    int sX = width / 2 - g2d.getFontMetrics().stringWidth(text) / 2;
+                    int sY = i*height/15 + g2d.getFont().getSize();
+                    g2d.drawString(text, sX, sY);
+                } catch (Exception e) {
+
+                }
+            }
+            String text = "ENTER/SPACE to continue";
+            int sX = width / 2 - g2d.getFontMetrics().stringWidth(text) / 2;
+            int sY = height - g2d.getFont().getSize();
+            g2d.drawString(text, sX, sY);
         }
+
         g2d.setColor(Color.WHITE);
         g2d.drawString("Score: " + Player.getScore(), 0, height - g2d.getFont().getSize());
 

@@ -20,7 +20,7 @@ public class Menu {
 
     private LinkedList<LinkedList<MenuOption>> menus;
     private int selected;
-    private LinkedList<Integer> oldKeys;
+    private static LinkedList<Integer> oldKeys;
 
     public Menu() {
         initialize();
@@ -41,7 +41,7 @@ public class Menu {
         float y = 0.1f;
 
         menu.add(new MenuOption(text, x, y, width, height, oState));
-        
+
         text = "Edit Name";
         y = 0.4f;
 
@@ -86,8 +86,7 @@ public class Menu {
         }
         //amount of selectable options, including 0
         int cap = 1;
-        if(Board.getGameState() == Board.GameState.MAIN_MENU)
-        {
+        if (Board.getGameState() == Board.GameState.MAIN_MENU) {
             cap = 2;
         }
         if (selected < 0) {
@@ -97,14 +96,15 @@ public class Menu {
             selected = 0;
         }
         if (Board.keys.contains(KeyEvent.VK_SPACE)
-                || Board.keys.contains(KeyEvent.VK_ENTER)) {
+                && !oldKeys.contains(KeyEvent.VK_SPACE)
+                || Board.keys.contains(KeyEvent.VK_ENTER)
+                && !oldKeys.contains(KeyEvent.VK_ENTER)) {
             if (selected == 0) {
                 //Play or Resume, both do the same
                 if (Board.getGameState() == Board.GameState.MAIN_MENU
                         || Board.getGameState() == Board.GameState.PAUSED) {
                     Board.setGameState(Board.GameState.RUNNING);
-                }
-                else if (Board.getGameState() == Board.GameState.GAME_OVER) {
+                } else if (Board.getGameState() == Board.GameState.GAME_OVER) {
                     Board.revive();
                     Board.setGameState(Board.GameState.MAIN_MENU);
                 }
@@ -114,8 +114,7 @@ public class Menu {
                 if (Board.getGameState() == Board.GameState.MAIN_MENU) {
                     String input = JOptionPane.showInputDialog("Name:", Player.getName());
                     Player.setName(input);
-                }
-                else if (Board.getGameState() == Board.GameState.PAUSED) {
+                } else if (Board.getGameState() == Board.GameState.PAUSED) {
                     Board.quit();
                 }
             }
@@ -128,7 +127,7 @@ public class Menu {
     }
 
     public void draw(Graphics2D g2d, int width, int height) {
-        
+
         for (int j = 0; j < menus.size(); j++) {
 
             for (int i = 0; i < menus.get(j).size(); i++) {
