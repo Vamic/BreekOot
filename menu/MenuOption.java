@@ -15,12 +15,12 @@ import java.awt.Graphics2D;
  */
 public class MenuOption {
 
-    private String text;
-    private float x;
-    private float y;
-    private float width;
-    private float height;
-    private Board.GameState state;
+    private final String text;
+    private final float x;
+    private final float y;
+    private final float width;
+    private final float height;
+    private final Board.GameState state;
 
     public MenuOption(String text, float x, float y, float width, float height, Board.GameState state) {
         this.text = text;

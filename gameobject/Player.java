@@ -15,10 +15,19 @@ import java.awt.event.KeyEvent;
  */
 public class Player extends GameObject {
 
-    private float speed;
+    private final float speed;
     private float direction;
     private static int score;
     private static int lives;
+    private static String name;
+
+    public static String getName() {
+        return name;
+    }
+
+    public static void setName(String name) {
+        Player.name = name.toUpperCase().substring(0, 3);
+    }
 
     public int getLives() {
         return lives;
@@ -40,6 +49,8 @@ public class Player extends GameObject {
         this.speed = speed;
         direction = 0;
         Player.lives = lives;
+        Player.score = 0;
+        Player.name = "AAA";
     }
 
     @Override

@@ -17,6 +17,12 @@ import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileReader;
+import java.io.FileWriter;
+import java.io.PrintWriter;
 import java.util.LinkedList;
 import javax.swing.JPanel;
 
@@ -26,15 +32,12 @@ import javax.swing.JPanel;
  */
 public class Board extends JPanel implements Runnable, KeyListener {
 
-    public static void quit() {
-        //save();
-        System.exit(0);
-    }
-
     private Thread animator;
     static public LinkedList<Integer> keys;
     private LinkedList<GameObject> gameObjects;
     private Menu menu;
+    static private String highscore;
+    static private boolean reset;
 
     public enum GameState {
 
@@ -53,7 +56,61 @@ public class Board extends JPanel implements Runnable, KeyListener {
         Board.gameState = gameState;
     }
 
+    public static void quit() {
+        save();
+        System.exit(0);
+    }
+    
+    public static void revive() {
+        save();
+        reset = true;
+    }
+
+    private static void save() {
+        int count = 0;
+        try (PrintWriter writer = new PrintWriter(new BufferedWriter(new FileWriter("highscore.txt")))) {
+            for (String line : highscore.split("\\n")) {
+                count++;
+                String sScore = "0";
+                try {
+                    sScore = line.split(":")[1];
+                } catch (Exception e) {
+                }
+                int score = Integer.parseInt(sScore);
+                if (Player.getScore() > score && count < 100) {
+                    count = 100;
+                    writer.println(Player.getName() + ":" + Player.getScore());
+                }
+                writer.println(line);
+            }
+            if(count < 10)
+            {
+                writer.println(Player.getName() + ":" + Player.getScore());
+            }
+        } catch (Exception ex) {
+            System.out.println(ex);
+        }
+    }
+
     private void resetGame() {
+        File file = new File("highscore.txt");
+
+        try {
+            BufferedReader reader = new BufferedReader(new FileReader(file));
+            String text = "";
+            for (String line = reader.readLine();
+                    line != null;
+                    line = reader.readLine()) {
+                text += line;
+                text += "\n";
+            }
+            highscore = text;
+        } catch (Exception ex) {
+        }
+
+        reset = false;
+        
+        gameObjects = new LinkedList<>();
         //Decide how many blocks, also makes ball size appropriate
         int rows = 10;
         int columns = 10;
@@ -79,7 +136,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
         //50% per second, yellow, 5 lives
         float pSpeed = 0.5f;
         color = Color.YELLOW;
-        int lives = 5;
+        int lives = 1;
         gameObjects.add(new Player(x, y, width, height, true, color, pSpeed, lives));
 
         //create blocks
@@ -190,6 +247,11 @@ public class Board extends JPanel implements Runnable, KeyListener {
     }
 
     private void updateGame(long delta) {
+        if(reset)
+        {
+            resetGame();
+            return;
+        }
         if (gameState == GameState.RUNNING) {
             //Update all GameObjects
             for (GameObject go : gameObjects) {
@@ -228,7 +290,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
         } else if (gameState == GameState.MAIN_MENU) {
             menu.update();
         } else if (gameState == GameState.GAME_OVER) {
-
+            menu.update();
         }
     }
 
@@ -248,7 +310,7 @@ public class Board extends JPanel implements Runnable, KeyListener {
             menu.draw(g2d, width, height);
         }
         g2d.setColor(Color.WHITE);
-        g2d.drawString("Score: " + Player.getScore(), 0, height-g2d.getFont().getSize());
+        g2d.drawString("Score: " + Player.getScore(), 0, height - g2d.getFont().getSize());
 
     }
 }
